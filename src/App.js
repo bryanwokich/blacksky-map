@@ -4,8 +4,9 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import Map, {Marker} from 'react-map-gl';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
+import {MAPBOX_TOKEN} from "./constants/constants";
+import useWindowSize from "./hooks/useWindowSize";
 
-const MAPBOX_TOKEN = 'pk.eyJ1IjoiYnJ5YW53b2tpY2giLCJhIjoiY2w2bnNvenl6MDQxcDNpcXVkNDhoc2pxbSJ9.2MlHpP4yxcy3kCpaBRTLPg'; // Set your mapbox token here
 
 function Basic() {
   return (
@@ -25,20 +26,21 @@ function Basic() {
 }
 
 
-function Controlled() {
+function MapBoxWrapper() {
   const [viewState, setViewState] = useState({
     latitude: 37.8,
     longitude: -122.4,
-    zoom: 12
+    zoom: 1
   });
 
+  const {width, height} = useWindowSize()
   return (
     <Map
       latitude={viewState.latitude}
       longitude={viewState.longitude}
       zoom={viewState.zoom}
       onMove={evt => setViewState(evt.viewState)}
-      style={{width: 800, height: 600}}
+      style={{width, height}}
       mapStyle="mapbox://styles/mapbox/satellite-v9"
       mapboxAccessToken={MAPBOX_TOKEN}
     >
@@ -46,4 +48,10 @@ function Controlled() {
   );
 }
 
-export default Controlled
+function App(){
+  return <div className="bmw-map-app">
+    <MapBoxWrapper />
+  </div>
+}
+
+export default App
