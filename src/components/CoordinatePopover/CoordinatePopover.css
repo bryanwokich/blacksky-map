@@ -1,0 +1,10 @@
+.bmw-coordinate-details{
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 20px;
+    background-color: #e3e3e3;
+    border-radius: 12px;
+    border: 2px solid gray;
+    opacity: .8;
+}
