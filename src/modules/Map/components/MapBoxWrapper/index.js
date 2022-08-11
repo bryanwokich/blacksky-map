@@ -1,1 +1,1 @@
-export { default } from "./MapBoxWrapper"
+export { default } from "../../Map"

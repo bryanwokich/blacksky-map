@@ -17,8 +17,8 @@ function MapBoxWrapper() {
       longitude={viewState.longitude}
       zoom={viewState.zoom}
       onMove={evt => setViewState(evt.viewState)}
-      style={{width, height}}
-      mapStyle="mapbox://styles/mapbox/satellite-v9"
+      style={{width: 600, height: 400}}
+      mapStyle="mapbox://styles/mapbox/streets-v9"
       mapboxAccessToken={MAPBOX_TOKEN}
     >
     </Map>
