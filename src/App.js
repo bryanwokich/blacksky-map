@@ -29,12 +29,14 @@ function Controlled() {
   const [viewState, setViewState] = useState({
     latitude: 37.8,
     longitude: -122.4,
-    zoom: 14
+    zoom: 12
   });
 
   return (
     <Map
-      {...viewState}
+      latitude={viewState.latitude}
+      longitude={viewState.longitude}
+      zoom={viewState.zoom}
       onMove={evt => setViewState(evt.viewState)}
       style={{width: 800, height: 600}}
       mapStyle="mapbox://styles/mapbox/satellite-v9"
