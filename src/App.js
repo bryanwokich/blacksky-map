@@ -3,25 +3,30 @@ import React, {useState} from 'react';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import DeckGL from '@deck.gl/react';
-import {LineLayer} from '@deck.gl/layers';
+import {LineLayer, TextLayer} from '@deck.gl/layers';
+import {ScatterplotLayer} from 'deck.gl';
 
-
-import MapBoxWrapper from "./modules/Map/components/MapBoxWrapper";
 import {MAPBOX_TOKEN} from "./constants/constants";
 import Map from "react-map-gl";
 import useWindowSize from "./hooks/useWindowSize";
 
-//
-
-
-
-
-
 function App(){
   const data = [
-    {sourcePosition: [-122.41669, 37.7853], targetPosition: [-121.41669, 37.781]}
+    {sourcePosition: [-122.41669, 37.7853], targetPosition: [-112.41669, 39.781]},
   ];
 
+  const bart = new ScatterplotLayer({
+    id: 'bart-stations',
+    data: [
+      {name: 'Colma', passengers: 4214, coordinates: [-122.466233, 37.684638]},
+      {name: 'Civic Center', passengers: 24798, coordinates: [-122.413756,37.779528]},
+    ],
+    stroked: false,
+    filled: true,
+    getPosition: data => data.coordinates,
+    getRadius: data => Math.sqrt(data.passengers),
+    getFillColor: [255, 200, 0]
+  });
 
   const INITIAL_VIEW_STATE = {
     longitude: -122.41669,
@@ -31,7 +36,9 @@ function App(){
     bearing: 0
   };
   const layers = [
-    new LineLayer({id: 'line-layer', data})
+    new LineLayer({id: 'line-layer', data}),
+    bart
+
   ];
 
   const [viewState, setViewState] = useState({
