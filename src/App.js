@@ -10,6 +10,7 @@ import {ColumnLayer} from '@deck.gl/layers';
 import {EVENT_COLORS, INITIAL_VIEW_STATE, MAPBOX_TOKEN} from "./constants/constants";
 import Map from "react-map-gl";
 import {EVENTS} from "./constants/events";
+import CoordinatePopover from "./components/CoordinatePopover";
 
 function App() {
   const [activeCoordinate, setActiveCoordinate] = useState(null)
@@ -111,12 +112,12 @@ function App() {
         mapStyle="mapbox://styles/mapbox/streets-v9"
         mapboxAccessToken={MAPBOX_TOKEN}
       />
-      {activeCoordinate && <div className="bmw-coordinate-details">
-        Coordinates: {activeCoordinate.coordinates[0]}, {activeCoordinate.coordinates[1]} <br/>
-        Topics: {activeCoordinate.topics.join(', ')}
-        <br/>
-        Total Events: {activeCoordinate.count}
-      </div>}
+      {activeCoordinate && <CoordinatePopover
+        coordinates={activeCoordinate.coordinates}
+        topics={activeCoordinate.topics}
+        count={activeCoordinate.count}
+      />
+      }
     </DeckGL>
   </div>
 }
