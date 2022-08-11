@@ -1,4 +1,4 @@
-{
+export const EVENTS = {
   "totalItems": 26472,
   "limit": 10000,
   "searchAfter": [

@@ -1,53 +1,105 @@
-import React, {useState} from 'react';
+import React, {useState, useMemo} from 'react';
 // MapBox
 import 'mapbox-gl/dist/mapbox-gl.css';
+import './App.css'
 
 import DeckGL from '@deck.gl/react';
-import {LineLayer, TextLayer} from '@deck.gl/layers';
-import {ScatterplotLayer} from 'deck.gl';
+import {ColumnLayer} from '@deck.gl/layers';
 
-import {MAPBOX_TOKEN} from "./constants/constants";
+
+import {EVENT_COLORS, INITIAL_VIEW_STATE, MAPBOX_TOKEN} from "./constants/constants";
 import Map from "react-map-gl";
-import useWindowSize from "./hooks/useWindowSize";
+import {EVENTS} from "./constants/events";
 
-function App(){
-  const data = [
-    {sourcePosition: [-122.41669, 37.7853], targetPosition: [-112.41669, 39.781]},
-  ];
+function App() {
+  const [activeCoordinate, setActiveCoordinate] = useState(null)
+  const createColumnLayer = useMemo(() => {
+    return ({topicKey, events}) => {
+      const topicKeyUp = topicKey.toUpperCase()
+      const columnData = events.map((eventItem) => {
+        return {
+          centroid: eventItem.coordinates,
+          value: eventItem.count,
+          rawData: eventItem
+        }
+      })
+      return new ColumnLayer({
+        id: topicKey,
+        data: columnData,
+        diskResolution: 120,
+        radius: 2500,
+        extruded: true,
+        pickable: true,
+        elevationScale: 5000,
+        onHover: ({object, picked}) => {
+          if(picked){
+            setActiveCoordinate(object.rawData)
+          } else {
+            setActiveCoordinate(null)
+          }
 
-  const bart = new ScatterplotLayer({
-    id: 'bart-stations',
-    data: [
-      {name: 'Colma', passengers: 4214, coordinates: [-122.466233, 37.684638]},
-      {name: 'Civic Center', passengers: 24798, coordinates: [-122.413756,37.779528]},
-    ],
-    stroked: false,
-    filled: true,
-    getPosition: data => data.coordinates,
-    getRadius: data => Math.sqrt(data.passengers),
-    getFillColor: [255, 200, 0]
-  });
+        },
+        onClick: ({object}) => {
+          setActiveCoordinate(object.rawData)
+        },
+        getPosition: d => d.centroid,
+        getFillColor: d => {
+          if (!EVENT_COLORS.hasOwnProperty(topicKeyUp)) {
+            console.warn('ADD', topicKeyUp)
+            return [0, 0, 0]
+          }
+          return EVENT_COLORS[topicKeyUp]
+        },
+        getElevation: d => d.value
+      });
+    }
+  }, [])
 
-  const INITIAL_VIEW_STATE = {
-    longitude: -122.41669,
-    latitude: 37.7853,
-    zoom: 1,
-    pitch: 0,
-    bearing: 0
-  };
-  const layers = [
-    new LineLayer({id: 'line-layer', data}),
-    bart
+  const layers = useMemo(() => {
+    const groupedEvents = {}
+    EVENTS.items.forEach(eventItem => {
+      const coordinates = `${eventItem.geometry.coordinates}`
+      const geometricKey = coordinates
+      let groupedEventCount = 0
+      // Group our events using a geographic key.  This will let us get a count
+      if (groupedEvents.hasOwnProperty(geometricKey)) {
+        groupedEvents[geometricKey].count++
+        const potentialDuplicateTopics = groupedEvents[geometricKey].topics.concat(eventItem.properties.tag.topic)
+        groupedEvents[geometricKey].topics = potentialDuplicateTopics.filter((item, index) => {
+          return potentialDuplicateTopics.indexOf(item) == index
+        })
+      } else {
+        groupedEvents[geometricKey] = {
+          coordinates: eventItem.geometry.coordinates,
+          count: 1,
+          topics: eventItem.properties.tag.topic
+        }
+      }
+    })
 
-  ];
+    // We have now grouped items that have the same coordinates.  This will sort them
+    // into topics
+    const eventsSortedByTopic = {}
+    Object.keys(groupedEvents).forEach(coordinate => {
+      const topicKey = groupedEvents[coordinate].topics.length == 1 ? `${groupedEvents[coordinate].topics}` : 'multiple_topics'
+      if (eventsSortedByTopic.hasOwnProperty(topicKey)) {
+        eventsSortedByTopic[topicKey].push(groupedEvents[coordinate])
+      } else {
+        eventsSortedByTopic[topicKey] = [groupedEvents[coordinate]]
+      }
+    })
 
-  const [viewState, setViewState] = useState({
-    latitude: 37.8,
-    longitude: -122.4,
-    zoom: 1
-  });
+    const layers = []
 
-  const {width, height} = useWindowSize()
+    // Finally, we loop the sorted events to create our Column Layers
+    const result = Object.keys(eventsSortedByTopic).map(topicKey => {
+      return createColumnLayer({
+        events: eventsSortedByTopic[topicKey],
+        topicKey
+      })
+    })
+    return result
+  }, [])
 
   return <div className="bmw-map-app">
     <DeckGL
@@ -56,13 +108,17 @@ function App(){
       layers={layers}
     >
       <Map
-        onMove={evt => setViewState(evt.viewState)}
         mapStyle="mapbox://styles/mapbox/streets-v9"
         mapboxAccessToken={MAPBOX_TOKEN}
-      >
-      </Map>
+      />
+      {activeCoordinate && <div className="bmw-coordinate-details">
+        Coordinates: {activeCoordinate.coordinates[0]}, {activeCoordinate.coordinates[1]} <br/>
+        Topics: {activeCoordinate.topics.join(', ')}
+        <br/>
+        Total Events: {activeCoordinate.count}
+      </div>}
     </DeckGL>
-    </div>
+  </div>
 }
 
 export default App
