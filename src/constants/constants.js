@@ -7,6 +7,8 @@ export const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
+
+// Colors used are from https://flatuicolors.com/palette/defo
 export const EVENT_COLORS = {
   CONFLICT: [231, 76, 60],
   DISASTER: [230, 126, 34],
