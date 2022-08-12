@@ -28,14 +28,6 @@ const createColumnLayer = ({topicKey, events, hoverAction}) => {
         hoverAction(null)
       }
     },
-    //   ({object, picked}) => {
-    //   // if(picked){
-    //   //   setActiveCoordinate(object.rawData)
-    //   // } else {
-    //   //   setActiveCoordinate(null)
-    //   // }
-    // },
-
     getPosition: d => d.centroid,
     getFillColor: d => {
       if (!EVENT_COLORS.hasOwnProperty(topicKeyUp)) {
