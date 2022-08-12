@@ -1,7 +1,7 @@
 # Bryan Wokich's Take Home Project
-Thanks for taking the time to review my project.  I found the DeckGL library to be 
-a fun library to play with. There is definitely a lot of improvements that could be 
-made to this little application, but I figured I shouldn't expand scope too much 
+Thanks for taking the time to review my project.  I found the DeckGL library to be
+a fun library to play with. There is definitely a lot of improvements that could be
+made to this little application, but I figured I shouldn't expand scope too much
 beyond the initial request.
 
 Have a wonderful day!
